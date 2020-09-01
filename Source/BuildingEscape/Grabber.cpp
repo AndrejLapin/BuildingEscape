@@ -51,8 +51,6 @@ void UGrabber::FindPhysicsHandle()
 
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grabber Pressed"));
-
 	FHitResult HitResult = GetFirstPhysicsBodyInReach();
 	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
 
@@ -72,8 +70,6 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grabber Released"));
-
 	PhysicsHandle->ReleaseComponent();
 }
 
@@ -93,21 +89,16 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	
 }
 
-FHitResult UGrabber::GetFirstPhysicsBodyInReach()
+FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 {
-	FVector PlayerViewpointLocation;
-	FRotator PlayerViewPointRotation;
-
-	FVector LineTraceEnd = GetLineTraceEnd(PlayerViewpointLocation, PlayerViewPointRotation);
-
 	FHitResult Hit;
 	// Ray-cast out to a certain distance (Reach)
 	FCollisionQueryParams TraceParams(FName(TEXT("")), false, GetOwner());
 
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT Hit,
-		PlayerViewpointLocation,
-		LineTraceEnd,
+		GetPlayerWorldPosition(),
+		GetLineTraceEnd(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 		);
@@ -122,7 +113,7 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 	return Hit;
 }
 
-FVector UGrabber::GetLineTraceEnd()
+FVector UGrabber::GetLineTraceEnd() const
 {
 	FVector PlayerViewpointLocation;
 	FRotator PlayerViewPointRotation;
@@ -138,17 +129,8 @@ FVector UGrabber::GetLineTraceEnd()
 	return PlayerViewpointLocation + PlayerViewPointRotation.Vector() * Reach;
 }
 
-FVector UGrabber::GetLineTraceEnd(FVector &out_location, FRotator &out_rotation)
+FVector UGrabber::GetPlayerWorldPosition() const
 {
-
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint
-	(
-		OUT out_location,
-		OUT out_rotation
-		);
-
-	// Draw a line from a player showing the reach.
-
-	return out_location + out_rotation.Vector() * Reach;
+	return GetOwner()->GetActorLocation();
 }
 
