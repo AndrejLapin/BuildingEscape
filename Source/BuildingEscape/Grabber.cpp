@@ -53,18 +53,6 @@ void UGrabber::Grab()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grabber Pressed"));
 
-	FVector PlayerViewpointLocation;
-	FRotator PlayerViewPointRotation;
-
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointLocation,
-		OUT PlayerViewPointRotation
-		);
-
-	// Draw a line from a player showing the reach.
-
-	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewPointRotation.Vector() * Reach;
-
 	FHitResult HitResult = GetFirstPhysicsBodyInReach();
 	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
 
@@ -76,7 +64,7 @@ void UGrabber::Grab()
 			(
 			ComponentToGrab,
 			NAME_None,
-			LineTraceEnd
+			GetLineTraceEnd()
 			);
 	}
 	
@@ -95,41 +83,22 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FVector PlayerViewpointLocation;
-	FRotator PlayerViewPointRotation;
-
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointLocation,
-		OUT PlayerViewPointRotation
-		);
-
-	// Draw a line from a player showing the reach.
-
-	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewPointRotation.Vector() * Reach;
-
 	// If the physics handle is attached
 	if (PhysicsHandle->GrabbedComponent)
 	{
-		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
 	}
 
 	// Get players viewpoint
 	
 }
 
-FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
+FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 {
 	FVector PlayerViewpointLocation;
 	FRotator PlayerViewPointRotation;
 
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointLocation,
-		OUT PlayerViewPointRotation
-		);
-
-	// Draw a line from a player showing the reach.
-
-	FVector LineTraceEnd = PlayerViewpointLocation + PlayerViewPointRotation.Vector() * Reach;
+	FVector LineTraceEnd = GetLineTraceEnd(PlayerViewpointLocation, PlayerViewPointRotation);
 
 	FHitResult Hit;
 	// Ray-cast out to a certain distance (Reach)
@@ -151,5 +120,35 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 	}
 
 	return Hit;
+}
+
+FVector UGrabber::GetLineTraceEnd()
+{
+	FVector PlayerViewpointLocation;
+	FRotator PlayerViewPointRotation;
+
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint
+	(
+		OUT PlayerViewpointLocation,
+		OUT PlayerViewPointRotation
+		);
+
+	// Draw a line from a player showing the reach.
+
+	return PlayerViewpointLocation + PlayerViewPointRotation.Vector() * Reach;
+}
+
+FVector UGrabber::GetLineTraceEnd(FVector &out_location, FRotator &out_rotation)
+{
+
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint
+	(
+		OUT out_location,
+		OUT out_rotation
+		);
+
+	// Draw a line from a player showing the reach.
+
+	return out_location + out_rotation.Vector() * Reach;
 }
 

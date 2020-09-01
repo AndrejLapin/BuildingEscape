@@ -28,7 +28,7 @@ protected:
 private:
 
 	UPROPERTY(EditAnywhere)
-	float Reach = 100.f;
+	float Reach = 175.f;
 
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 
@@ -38,7 +38,9 @@ private:
 	void Release();
 	void FindPhysicsHandle();
 	void SetupInputComponent();
+	FVector GetLineTraceEnd();
+	FVector GetLineTraceEnd(FVector &out_location, FRotator &out_rotation);
 
 	// Return the first Actor within reach with physics body.
-	FHitResult GetFirstPhysicsBodyInReach() const;
+	FHitResult GetFirstPhysicsBodyInReach();
 };
